@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Wox.Plugin.Everything.Everything
@@ -85,6 +86,9 @@ namespace Wox.Plugin.Everything.Everything
 
         [DllImport(Main.DLL, CharSet = CharSet.Unicode)]
         internal static extern void Everything_GetResultFullPathNameW(int nIndex, StringBuilder lpString, int nMaxCount);
+        // https://www.voidtools.com/forum/viewtopic.php?t=8169
+        [DllImport("Everything64.dll", CharSet = CharSet.Unicode)]
+        public static extern IntPtr Everything_GetResultFileNameW(int nIndex);
 
         [DllImport(Main.DLL)]
         internal static extern void Everything_Reset();

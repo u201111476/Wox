@@ -25,12 +25,9 @@ namespace Wox.Plugin.Everything.Everything
 
     public sealed class EverythingApi : IEverythingApi
     {
-        private const int BufferSize = 4096;
 
         private readonly object _syncObject = new object();
-        // cached buffer to remove redundant allocations.
-        private readonly StringBuilder _buffer = new StringBuilder(BufferSize);
-
+        
         public enum StateCode
         {
             OK,
@@ -168,10 +165,15 @@ namespace Wox.Plugin.Everything.Everything
                     {
                         return null;
                     }
-
-                    EverythingApiDllImport.Everything_GetResultFullPathNameW(idx, _buffer, BufferSize);
-
-                    var result = new SearchResult { FullPath = _buffer.ToString() };
+                    int bufferSize = 256;
+                    StringBuilder fullPathBuffer = new StringBuilder(bufferSize);
+                    // https://www.voidtools.com/forum/viewtopic.php?t=8169
+                    EverythingApiDllImport.Everything_GetResultFullPathNameW(idx, fullPathBuffer, bufferSize);
+                    string fileName = Marshal.PtrToStringUni(EverythingApiDllImport.Everything_GetResultFileNameW(idx));
+                    var result = new SearchResult { 
+                        FileName = fileName,
+                        FullPath = fullPathBuffer.ToString() 
+                    };
                     if (EverythingApiDllImport.Everything_IsFolderResult(idx))
                         result.Type = ResultType.Folder;
                     else if (EverythingApiDllImport.Everything_IsFileResult(idx))
